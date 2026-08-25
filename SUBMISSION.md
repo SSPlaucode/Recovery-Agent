@@ -202,54 +202,108 @@ thin result pass silently.
 
 ### 9b. Real Gemini pilot (n=5, small live validation — not evidence of AI superiority)
 
+Two real pilot runs were executed, on two different models, and both
+are reported — not just the more favorable one. The first run hit
+launch-week instability on a brand-new model; switching models (a
+same-day, same-architecture swap, since the provider is abstracted
+behind one interface — see §4) produced a full 5/5 live sample with a
+genuine policy-guard catch. Both runs are real API calls against a
+free-tier key; neither is cherry-picked over the other.
+
+**Run 2 (reported as primary — full live sample, no infrastructure noise):**
+
+```
+$env:GEMINI_MODEL="gemini-3.5-flash-lite"
+python run_pilot.py --n 5 --seed 42 --llm-client gemini
+```
+
+| | Count |
+|---|---|
+| Live Gemini calls that succeeded | 5 / 5 |
+| Fallbacks | 0 |
+| Final actions agreeing with the rule engine | 2 / 5 (40%) |
+| Policy violations (Gemini recommended an illegitimate action) | **1 / 5** |
+
+**All 5 cases, in full:**
+
+| TX | Failure | Rule engine action | Gemini action | Agree? | Rule engine outcome | Gemini outcome |
+|---|---|---|---|---|---|---|
+| TX_00000 | BANK_DECLINE | RETRY | SCHEDULE_RETRY | No | Recovered ₹33,898.63 | Recovered ₹33,898.63 |
+| TX_00001 | INSUFFICIENT_FUNDS | SCHEDULE_RETRY | SEND_MESSAGE | No | Recovered ₹28,149.00 | Recovered ₹28,149.00 |
+| TX_00002 | BANK_DECLINE | RETRY | SEND_MESSAGE | No | Recovered ₹17,143.48 | **REJECTED by policy guard → Escalated, ₹0** |
+| TX_00003 | CARD_NETWORK_ERROR | RETRY | RETRY | Yes | Recovered ₹30,264.56 | Recovered ₹30,264.56 |
+| TX_00004 | CARD_NETWORK_ERROR | RETRY | RETRY | Yes | Recovered ₹28,951.14 | Recovered ₹28,951.14 |
+
+**TX_00002 is the most important row in this table, not a footnote.**
+Gemini recommended `SEND_MESSAGE` for a `BANK_DECLINE` — not a
+legitimate action for that failure type under `ACTION_LEGITIMACY`
+(there is nothing a customer-facing message accomplishes when their
+own bank declined the charge). `guard_ai()` rejected it and forced
+`ESCALATE`, exactly as designed — see §5. The honest cost: this
+transaction, which the rule engine would have auto-recovered, went to
+manual escalation instead of automated recovery under Strategy C. This
+is not a case of the AI "winning" or "losing" in the abstract — it is
+the safety architecture doing precisely its job: a real model, on a
+real call, proposed something operationally invalid, and the
+deterministic guard — not the AI's own judgment — is what prevented it
+from executing. That is the project's core thesis (§5), demonstrated
+against real model output rather than only synthetic tests.
+
+On the two cases where Gemini agreed with the rule engine
+(TX_00003, TX_00004 — both `CARD_NETWORK_ERROR` → `RETRY`), and the two
+where it proposed a different but still-legitimate action that also
+fully recovered (TX_00000, TX_00001) — no claim is made that Gemini's
+alternative was *better* than the rule engine's; both paths succeeded
+on this simulator, and n=2/n=2 is far too small to say more than "a
+legitimate divergence occurred and didn't fail."
+
+**Run 1 (first attempt, kept for transparency — not the headline number):**
+
 ```
 python run_pilot.py --n 5 --seed 42 --llm-client gemini --cache-file gemini_pilot_cache.json
 ```
-
-Of 5 decisions requested: **2 were genuine Gemini decisions, 3 were
-infrastructure fallbacks** — these are not the same thing and are
-reported separately, not blended into "5 AI decisions":
+(model: `gemini-3.7-flash`, a preview model that shipped days before
+this pilot was run)
 
 | | Count |
 |---|---|
 | Live Gemini calls that succeeded | 2 |
-| Cache hits | 0 |
-| Cache misses | 0 |
 | Fallbacks (all 3 caused by Gemini HTTP 503 UNAVAILABLE) | 3 |
-| Final actions agreeing with the rule engine (after fallback handling) | 5/5 |
 | Policy violations | 0 |
 
-**The 2 genuine Gemini decisions:**
+The 2 genuine decisions in Run 1: BANK_DECLINE → RETRY (0.85
+confidence, recovered); CARD_NETWORK_ERROR → RETRY (0.90 confidence,
+recovered) — both trivial agreements with the rule engine, no
+divergence signal. The 3 fallbacks were real infrastructure failures
+(HTTP 503, not simulated) caught cleanly by the fallback path (§10)
+with zero crashes.
 
-| Failure | Gemini recommendation | Confidence | Outcome |
-|---|---|---|---|
-| BANK_DECLINE | RETRY | 0.85 | Recovered |
-| CARD_NETWORK_ERROR | RETRY | 0.90 | Recovered |
+**Why the model changed between runs:** `gemini-3.7-flash` returned
+503 UNAVAILABLE on 5/5 calls in a second attempt at Run 1 as well,
+consistent with launch-week overload on a brand-new preview model
+rather than anything specific to this project's request shape.
+Switching to `gemini-3.5-flash-lite` — an older, more established
+model on the same free tier — required a one-line environment
+variable change and zero code changes, which is the direct payoff of
+keeping the provider behind one interface (§4). This is itself a small
+but real demonstration of that design decision paying off under
+pressure, not just in theory.
 
-**The 3 fallback cases are not Gemini decisions at all** — they are
-the fallback path (§10) correctly catching a transient Gemini 503 and
-handing the case to the deterministic rule engine, which is why 5/5
-final actions still agreed with the rule engine's own recommendation
-and zero policy violations occurred. That 5/5 agreement figure
-reflects the fallback path working, not Gemini's decision quality —
-don't read it as "Gemini always agrees with the rule engine," since 3
-of those 5 cases never involved a Gemini decision at all.
-
-**What this pilot actually demonstrates:** the real LLM integration
-works end-to-end — structured output was correctly parsed and
-validated on both successful calls, the policy guard gated real
-model output with zero violations, and a real infrastructure failure
-(503, not a hypothetical) was caught and handled safely without
-crashing the batch or producing an unsafe action. **What it does not
-demonstrate:** anything about whether Gemini's decisions are better
-than the rule engine's — n=2 genuine decisions is a validation sample
-for the plumbing, not a dataset for a quality claim. Both of Gemini's
-real recommendations happened to match what the rule engine would
-also have chosen (RETRY for a transient failure) — informative as a
-sanity check (the model isn't recommending something obviously wrong),
-uninformative as a divergence signal, since the two easiest
-transient-failure cases aren't where the rule engine and a
-richer-context AI would be expected to differ.
+**What this pilot actually demonstrates, combining both runs:** the
+real LLM integration works end-to-end on two different models —
+structured output parses and validates correctly, the policy guard
+gates real model output correctly (including catching a real invalid
+recommendation, Run 2/TX_00002), and real infrastructure failures
+(Run 1's 503s) are caught and handled without crashing the batch.
+**What it does not demonstrate:** a statistically meaningful
+comparison of Gemini's decision quality against the rule engine's —
+n=5 per run is a validation sample for the plumbing and the guard, not
+a dataset for a superiority claim. The 40% agreement rate in Run 2 is
+worth noting precisely because it's *not* near 100% (the failure mode
+this pilot was built to catch — see run_pilot.py's own printed
+guidance) — Gemini is engaging with more than just `failure_reason`,
+for better (two legitimate alternative paths) and for worse (one
+illegitimate one, safely caught).
 
 ## 10. Failure handling / fallback
 
@@ -276,12 +330,14 @@ on screen, not just in code.
 
 - **The large-scale benchmark (§9a) is `DemoLLMClient`, a
   deterministic heuristic stand-in — not a real model call.** This
-  remains the single most important caveat for that layer. The real
-  Gemini pilot (§9b) has been executed, but at n=5 — 2 genuine
-  decisions, 3 infrastructure fallbacks — which validates that the
-  integration works, not that a real model outperforms the rule
-  engine at scale. Scaling the real pilot to something closer to
-  n=500-1000 live Gemini calls would be needed before any quality
+  remains the single most important caveat for that layer. Two real
+  Gemini pilots (§9b) have been executed at n=5 each — one hit
+  launch-week model instability (3/5 fallbacks), the other ran clean
+  (5/5 live, including a real policy-guard rejection of an invalid
+  Gemini recommendation) — which validates that the integration and
+  the guard both work correctly, not that a real model outperforms
+  the rule engine at scale. Scaling the real pilot to something closer
+  to n=500-1000 live Gemini calls would be needed before any quality
   claim about the real model could be made; that has not been done
   and isn't claimed.
 - Outcome probabilities are hand-picked, not empirically fit.
@@ -316,8 +372,6 @@ python3 run_benchmark.py --n 1000 --seed 42
 # Multi-seed robustness (mean +/- stdev, flags thin gaps)
 python3 run_benchmark.py --n 500 --seeds 20
 
-# The real model pilot (requires GEMINI_API_KEY + GEMINI_MODEL,
-# or ANTHROPIC_API_KEY + ANTHROPIC_MODEL)
 # The real model pilot (requires GEMINI_API_KEY + GEMINI_MODEL,
 # or ANTHROPIC_API_KEY + ANTHROPIC_MODEL) -- kept small on purpose,
 # see SUBMISSION.md Sec 9b: this validates the live integration and
@@ -375,11 +429,13 @@ B for its remaining attempts.
 
 ## What remains for the human/team to do
 
-- *(Done: real Gemini pilot executed — see §9b. n=5, 2 genuine
-  decisions + 3 correctly-handled infrastructure fallbacks. Optional
-  follow-up, not required for submission: scale the live pilot to a
-  larger n if a real-model quality claim is wanted before the
-  deadline — see §12.)*
+- *(Done: two real Gemini pilots executed — see §9b. Run 2 (primary):
+  n=5, 5/5 live calls, 0 fallbacks, including a real policy-guard
+  rejection of an illegitimate Gemini recommendation. Run 1: n=5,
+  2 genuine decisions + 3 correctly-handled infrastructure fallbacks.
+  Optional follow-up, not required for submission: scale the live
+  pilot to a larger n if a real-model quality claim is wanted before
+  the deadline — see §12.)*
 - Publish the repository to GitHub (public).
 - Take screenshots / record `report.html` for the pitch video.
 - Record the 5-minute pitch.
