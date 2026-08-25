@@ -1,0 +1,363 @@
+{
+  "single_seed": {
+    "methodology": {
+      "n": 1000,
+      "seed": 42,
+      "llm_client": "demo",
+      "llm_mode": "live",
+      "identical_transactions_across_strategies": true,
+      "strategy_independent_simulator_randomness": true,
+      "hidden_simulator_state_exposed_to_ai": false
+    },
+    "strategies": [
+      {
+        "strategy": "A: Fixed Retry",
+        "total_transactions": 1000,
+        "total_revenue_at_risk": 24714731.41,
+        "recovered_revenue": 9762067.76,
+        "unrecovered_revenue": 14952663.65,
+        "recovery_rate": 0.39498983816793987,
+        "escalated_count": 595,
+        "escalation_rate": 0.595,
+        "stopped_count": 0,
+        "stop_rate": 0.0,
+        "avg_automated_attempts_to_recovery": 1.6469135802469135,
+        "ai_calls_total": 0,
+        "ai_calls_per_case": 0.0,
+        "ai_fallback_count": 0,
+        "policy_violation_count": 0,
+        "avg_ai_confidence": null
+      },
+      {
+        "strategy": "B: Rule-Engine Agent",
+        "total_transactions": 1000,
+        "total_revenue_at_risk": 24714731.41,
+        "recovered_revenue": 18471644.34,
+        "unrecovered_revenue": 6243087.07,
+        "recovery_rate": 0.7473940959975822,
+        "escalated_count": 241,
+        "escalation_rate": 0.241,
+        "stopped_count": 0,
+        "stop_rate": 0.0,
+        "avg_automated_attempts_to_recovery": 1.5151515151515151,
+        "ai_calls_total": 0,
+        "ai_calls_per_case": 0.0,
+        "ai_fallback_count": 0,
+        "policy_violation_count": 0,
+        "avg_ai_confidence": null
+      },
+      {
+        "strategy": "C: AI Agent",
+        "total_transactions": 1000,
+        "total_revenue_at_risk": 24714731.41,
+        "recovered_revenue": 18833050.29,
+        "unrecovered_revenue": 5881681.120000001,
+        "recovery_rate": 0.7620171944243678,
+        "escalated_count": 224,
+        "escalation_rate": 0.224,
+        "stopped_count": 0,
+        "stop_rate": 0.0,
+        "avg_automated_attempts_to_recovery": 1.4574742268041236,
+        "ai_calls_total": 1000,
+        "ai_calls_per_case": 1.0,
+        "ai_fallback_count": 0,
+        "policy_violation_count": 0,
+        "avg_ai_confidence": 0.7278600000000001
+      }
+    ],
+    "ai_vs_rule_first_action_agreement": {
+      "total": 1000,
+      "agree": 690,
+      "disagree": 310,
+      "agreement_rate": 0.69,
+      "divergence_rate": 0.31
+    },
+    "category_breakdown": {
+      "a_fixed_retry": {
+        "BANK_DECLINE": {
+          "count": 201,
+          "at_risk": 5045313.57,
+          "recovered": 3349385.01,
+          "recovery_rate": 0.6638606230375488
+        },
+        "INSUFFICIENT_FUNDS": {
+          "count": 301,
+          "at_risk": 7356620.02,
+          "recovered": 1026302.07,
+          "recovery_rate": 0.1395072828567813
+        },
+        "CARD_NETWORK_ERROR": {
+          "count": 201,
+          "at_risk": 4738979.5,
+          "recovered": 4345732.47,
+          "recovery_rate": 0.917018626056517
+        },
+        "UNKNOWN": {
+          "count": 58,
+          "at_risk": 1489866.99,
+          "recovered": 386693.33,
+          "recovery_rate": 0.25954889436136847
+        },
+        "AUTH_FAILURE": {
+          "count": 93,
+          "at_risk": 2334959.89,
+          "recovered": 653954.88,
+          "recovery_rate": 0.2800711407509445
+        },
+        "EXPIRED_CARD": {
+          "count": 146,
+          "at_risk": 3748991.44,
+          "recovered": 0.0,
+          "recovery_rate": 0.0
+        }
+      },
+      "b_rule_engine": {
+        "BANK_DECLINE": {
+          "count": 201,
+          "at_risk": 5045313.57,
+          "recovered": 3349385.01,
+          "recovery_rate": 0.6638606230375488
+        },
+        "INSUFFICIENT_FUNDS": {
+          "count": 301,
+          "at_risk": 7356620.02,
+          "recovered": 6083116.19,
+          "recovery_rate": 0.8268900899410597
+        },
+        "CARD_NETWORK_ERROR": {
+          "count": 201,
+          "at_risk": 4738979.5,
+          "recovered": 4345732.47,
+          "recovery_rate": 0.917018626056517
+        },
+        "UNKNOWN": {
+          "count": 58,
+          "at_risk": 1489866.99,
+          "recovered": 0.0,
+          "recovery_rate": 0.0
+        },
+        "AUTH_FAILURE": {
+          "count": 93,
+          "at_risk": 2334959.89,
+          "recovered": 1753064.47,
+          "recovery_rate": 0.750789971814034
+        },
+        "EXPIRED_CARD": {
+          "count": 146,
+          "at_risk": 3748991.44,
+          "recovered": 2940346.2,
+          "recovery_rate": 0.7843032578383269
+        }
+      },
+      "c_ai_agent": {
+        "BANK_DECLINE": {
+          "count": 201,
+          "at_risk": 5045313.57,
+          "recovered": 3713879.38,
+          "recovery_rate": 0.7361047690044763
+        },
+        "INSUFFICIENT_FUNDS": {
+          "count": 301,
+          "at_risk": 7356620.02,
+          "recovered": 5986369.16,
+          "recovery_rate": 0.8137390736133195
+        },
+        "CARD_NETWORK_ERROR": {
+          "count": 201,
+          "at_risk": 4738979.5,
+          "recovered": 4439391.08,
+          "recovery_rate": 0.9367820814586769
+        },
+        "UNKNOWN": {
+          "count": 58,
+          "at_risk": 1489866.99,
+          "recovered": 0.0,
+          "recovery_rate": 0.0
+        },
+        "AUTH_FAILURE": {
+          "count": 93,
+          "at_risk": 2334959.89,
+          "recovered": 1753064.47,
+          "recovery_rate": 0.750789971814034
+        },
+        "EXPIRED_CARD": {
+          "count": 146,
+          "at_risk": 3748991.44,
+          "recovered": 2940346.2,
+          "recovery_rate": 0.7843032578383269
+        }
+      }
+    },
+    "sample_cases": {
+      "recovered": {
+        "transaction_id": "TX_00000",
+        "amount": 33898.63,
+        "failure_reason": "BANK_DECLINE",
+        "terminal_state": "RECOVERED",
+        "amount_recovered": 33898.63,
+        "total_attempts": 1,
+        "ai_calls": 1,
+        "had_ai_fallback": false,
+        "had_policy_violation": false,
+        "final_confidence": 0.7,
+        "audit_trail": [
+          {
+            "step": 0,
+            "state": "DETECTED",
+            "detail": "amount=\u20b933898.63, failure=BANK_DECLINE"
+          },
+          {
+            "step": 1,
+            "state": "ANALYZING",
+            "detail": "attempt_count=0"
+          },
+          {
+            "step": 2,
+            "state": "DIAGNOSED",
+            "detail": "[AI/ai/initial] 0 prior failures and 30.4h elapsed suggest an immediate retry is less likely to land than a delayed one. (confidence=0.70)"
+          },
+          {
+            "step": 3,
+            "state": "INTERVENTION_SELECTED",
+            "detail": "recommended=SCHEDULE_RETRY"
+          },
+          {
+            "step": 4,
+            "state": "POLICY_CHECK",
+            "detail": "allowed SCHEDULE_RETRY (attempt 1/3)"
+          },
+          {
+            "step": 5,
+            "state": "ACTION_EXECUTED",
+            "detail": "SCHEDULE_RETRY -> SUCCESS, recovered=\u20b933898.63"
+          },
+          {
+            "step": 6,
+            "state": "RECOVERED",
+            "detail": "total_recovered=\u20b933898.63"
+          }
+        ]
+      },
+      "escalated": {
+        "transaction_id": "TX_00003",
+        "amount": 30264.56,
+        "failure_reason": "CARD_NETWORK_ERROR",
+        "terminal_state": "ESCALATED",
+        "amount_recovered": 0.0,
+        "total_attempts": 3,
+        "ai_calls": 1,
+        "had_ai_fallback": false,
+        "had_policy_violation": false,
+        "final_confidence": 0.7,
+        "audit_trail": [
+          {
+            "step": 0,
+            "state": "DETECTED",
+            "detail": "amount=\u20b930264.56, failure=CARD_NETWORK_ERROR"
+          },
+          {
+            "step": 1,
+            "state": "ANALYZING",
+            "detail": "attempt_count=0"
+          },
+          {
+            "step": 2,
+            "state": "DIAGNOSED",
+            "detail": "[AI/ai/initial] 1 prior failures and 38.7h elapsed suggest an immediate retry is less likely to land than a delayed one. (confidence=0.70)"
+          },
+          {
+            "step": 3,
+            "state": "INTERVENTION_SELECTED",
+            "detail": "recommended=SCHEDULE_RETRY"
+          },
+          {
+            "step": 4,
+            "state": "POLICY_CHECK",
+            "detail": "allowed SCHEDULE_RETRY (attempt 1/3)"
+          },
+          {
+            "step": 5,
+            "state": "ACTION_EXECUTED",
+            "detail": "SCHEDULE_RETRY -> FAILURE"
+          },
+          {
+            "step": 6,
+            "state": "ANALYZING",
+            "detail": "attempt_count=1"
+          },
+          {
+            "step": 7,
+            "state": "DIAGNOSED",
+            "detail": "[TRANSIENT/rule/deterministic-retry] Likely transient technical/bank failure."
+          },
+          {
+            "step": 8,
+            "state": "INTERVENTION_SELECTED",
+            "detail": "recommended=RETRY"
+          },
+          {
+            "step": 9,
+            "state": "POLICY_CHECK",
+            "detail": "allowed RETRY (attempt 2/3)"
+          },
+          {
+            "step": 10,
+            "state": "ACTION_EXECUTED",
+            "detail": "RETRY -> FAILURE"
+          },
+          {
+            "step": 11,
+            "state": "ANALYZING",
+            "detail": "attempt_count=2"
+          },
+          {
+            "step": 12,
+            "state": "DIAGNOSED",
+            "detail": "[TRANSIENT/rule/deterministic-retry] Likely transient technical/bank failure."
+          },
+          {
+            "step": 13,
+            "state": "INTERVENTION_SELECTED",
+            "detail": "recommended=RETRY"
+          },
+          {
+            "step": 14,
+            "state": "POLICY_CHECK",
+            "detail": "allowed RETRY (attempt 3/3)"
+          },
+          {
+            "step": 15,
+            "state": "ACTION_EXECUTED",
+            "detail": "RETRY -> FAILURE"
+          },
+          {
+            "step": 16,
+            "state": "ANALYZING",
+            "detail": "attempt_count=3"
+          },
+          {
+            "step": 17,
+            "state": "DIAGNOSED",
+            "detail": "[TRANSIENT/rule/deterministic-retry] Likely transient technical/bank failure."
+          },
+          {
+            "step": 18,
+            "state": "INTERVENTION_SELECTED",
+            "detail": "recommended=RETRY"
+          },
+          {
+            "step": 19,
+            "state": "POLICY_CHECK",
+            "detail": "rejected RETRY (MAX_ATTEMPTS); forced ESCALATE"
+          },
+          {
+            "step": 20,
+            "state": "ESCALATED",
+            "detail": "max attempts reached, illegitimate action, or no safe automated action"
+          }
+        ]
+      },
+      "policy_violation": null
+    }
+  }
+}

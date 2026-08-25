@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+ai_cache*.json
+pilot_cache.json
+pilot_comparison.csv
+gemini_pilot_cache.json

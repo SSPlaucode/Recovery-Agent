@@ -1,0 +1,11 @@
+# Runtime: only used by AnthropicLLMClient/GeminiLLMClient (--llm-client
+# anthropic|gemini). Not needed for --llm-client demo, the default, or
+# for the benchmark/report/tests -- installed here anyway so the real
+# providers work out of the box for anyone following the README.
+requests>=2.31
+
+# Test runner. The test suite is plain unittest.TestCase (no pytest-
+# specific fixtures or plugins), so `python -m unittest` also works
+# with zero extra installs -- pytest is here because the documented
+# fresh-clone flow uses `python -m pytest`.
+pytest>=7.4
